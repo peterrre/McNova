@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Start"
+    android:transitionGroup="true">
+
+    <TextView
+        android:id="@+id/sample_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        android:layout_above="@+id/buttonConnect"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/buttonConnect"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="30dp"
+        android:onClick="connectToRobot"
+        android:text="Verbindung herstellen"
+        android:textAppearance="@style/TextAppearance.AppCompat.Button" />
+
+    <TextView
+        android:id="@+id/textRepeats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Anzahl der Wiederholungen:"
+        android:layout_below="@+id/buttonConnect" />
+
+    <TextView
+        android:id="@+id/repeats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="30dp"
+        android:text="5"
+        android:layout_below="@+id/textRepeats"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:id="@+id/decrease"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textRepeats"
+        android:layout_toLeftOf="@+id/repeats"
+        android:layout_marginRight="30dp"
+        android:text="-"
+        android:onClick="decreaseRepeats" />
+
+    <Button
+        android:id="@+id/increase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/repeats"
+        android:layout_below="@+id/textRepeats"
+        android:layout_marginLeft="30dp"
+        android:text="+"
+        android:onClick="increaseRepeats"/>
+
+    <Button
+        android:id="@+id/exercise1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/repeats"
+        android:layout_alignParentLeft="true"
+        android:layout_margin="20dp"
+        android:text="Uebung1"
+        android:onClick="writeCharacteristic" />
+    <Button
+        android:id="@+id/exercise2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/repeats"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:text="Uebung2"
+        android:onClick="decreaseRepeats" />
+    <Button
+        android:id="@+id/exercise3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/repeats"
+        android:layout_alignParentRight="true"
+        android:layout_margin="20dp"
+        android:text="Uebung3"
+        android:onClick="decreaseRepeats" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bluetooth:"
+        android:id="@+id/bluetooth"
+        android:textColor="#b18a35"
+        android:textSize="20dp"
+        android:layout_below="@+id/exercise1"
+        android:layout_marginLeft="20dp"
+        android:layout_alignParentLeft="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn On"
+        android:id="@+id/buttonOn"
+        android:layout_below="@+id/bluetooth"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp"
+        android:clickable="true"
+        android:onClick="on" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn Off"
+        android:onClick="off"
+        android:id="@+id/buttonOff"
+        android:layout_below="@+id/buttonOn"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BLE:"
+        android:id="@+id/ble"
+        android:textColor="#b18a35"
+        android:textSize="20dp"
+        android:layout_below="@+id/exercise3"
+        android:layout_marginRight="20dp"
+        android:layout_alignParentRight="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="List devices"
+        android:onClick="list"
+        android:id="@+id/buttonList"
+        android:layout_below="@+id/bluetooth"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="bleScan"
+        android:id="@+id/bleScan"
+        android:layout_below="@+id/ble"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="blestop"
+        android:id="@+id/bleScanStop"
+        android:layout_below="@+id/bleScan"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="20dp"/>
+
+    <Space
+        android:id="@+id/space"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@+id/bleScanStop" />
+
+    <ListView
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/listView"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView2"
+        android:layout_above="@+id/bottom"/>
+
+
+    <TextView
+        android:id="@+id/TextViewBLE"
+        android:layout_width="190dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewBLE" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Paired devices:"
+        android:id="@+id/textView2"
+        android:textColor="#b18a35"
+        android:textSize="20dp"
+        android:layout_below="@+id/space"
+        android:layout_alignLeft="@+id/listView" />
+
+    <TextView
+        android:id="@+id/textViewBLE"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/space"
+        android:layout_toEndOf="@+id/repeats"
+        android:text="BLE Scan:"
+        android:textColor="#b18a35"
+        android:textSize="20dp" />
+
+    <FrameLayout
+        android:id="@+id/bottom"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:background="@color/colorPrimaryDark">
+
+        <TextView
+            android:id="@+id/connectionBool"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="5dp"
+            android:text="not connected"
+            android:gravity="end"
+            android:textAlignment="gravity"/>
+    </FrameLayout>
+
+
+</RelativeLayout>
