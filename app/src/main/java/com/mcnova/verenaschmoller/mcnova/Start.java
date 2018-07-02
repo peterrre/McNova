@@ -544,13 +544,15 @@ public class Start extends AppCompatActivity {
             Log.e(TAG, "char found!" + charac);
         }
 
-        byte[] value = new byte[2];
-        int repeats = Integer.parseInt(findViewById(R.id.repeats).toString());
-        value[0] = (byte) repeats;
+        byte[] value = new byte[16];
+        TextView repeats = findViewById(R.id.repeats);
+        int nRepeats = Integer.parseInt(repeats.getText().toString());
+        //Integer.parseInt(repeats.getText().toString());
+        value[0] = (byte) nRepeats;
         int exerciseId = Integer.parseInt(view.getTag().toString());
         value[1] = (byte) exerciseId;
         //value[15] = 0x01;
-        /*for (int i = 0; i < 14; i++)
+        /*for (int i = 2; i < 16; i++)
         {
             value[i] = 0x00;
         }*/
