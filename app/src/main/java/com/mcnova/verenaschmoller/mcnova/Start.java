@@ -146,8 +146,8 @@ public class Start extends AppCompatActivity {
         bleTextView.setMovementMethod(new ScrollingMovementMethod());
 
         // Example of a call to a native method
-        TextView tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        //TextView tv = findViewById(R.id.sample_text);
+        //tv.setText(stringFromJNI());
 
         if (BA.isEnabled()) {
             btOn.setEnabled(false);
@@ -223,14 +223,24 @@ public class Start extends AppCompatActivity {
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native String stringFromJNI();
+    //public native String stringFromJNI();
 
     public void connectToRobot(View view) {
+
+        pairedDevices = BA.getBondedDevices();
+        for (BluetoothDevice bt : pairedDevices) {
+            Log.e(TAG, bt.getName() + " = " + bluetoothDevice);
+            Log.e(TAG, Boolean.toString(bt.getName().equals(bluetoothDevice)));
+            if (bt.getName().equals(bluetoothDevice)) {
+                _bluetoothDev = bt;
+            }
+        }
+
         BluetoothSocket socket = null;
         TextView pressed = findViewById(R.id.connectionBool);
         if (_bluetoothDev.getName() != "") {
             Log.e(TAG, _bluetoothDev.getAddress());
-            //_bluetoothDev.createBond();
+            //_bluetoothDe#v.createBond();
             int bond = _bluetoothDev.getBondState();
             pressed.setText(String.valueOf(bond) + " to " + _bluetoothDev.getName());
             mBluetoothGatt = _bluetoothDev.connectGatt(this, false, mGattCallback);
@@ -260,10 +270,15 @@ public class Start extends AppCompatActivity {
         temp = Integer.parseInt(repeats.getText().toString());
         temp += 1;
         repeats.setText(String.valueOf(temp));
-        if (temp > 1) {
-            Button bt = findViewById(R.id.decrease);
-            bt.setEnabled(true);
+        if (temp == 10) {
+            Button bt = findViewById(R.id.increase);
+            bt.setEnabled(false);
         }
+        else if (temp > 1) {
+            findViewById(R.id.increase).setEnabled(true);
+            findViewById(R.id.decrease).setEnabled(true);
+        }
+
     }
 
     public void decreaseRepeats(View view) {
@@ -275,6 +290,10 @@ public class Start extends AppCompatActivity {
         if (temp == 1) {
             Button bt = findViewById(R.id.decrease);
             bt.setEnabled(false);
+        }
+        else if (temp < 10){
+            findViewById(R.id.increase).setEnabled(true);
+            findViewById(R.id.decrease).setEnabled(true);
         }
     }
 
@@ -525,8 +544,11 @@ public class Start extends AppCompatActivity {
             Log.e(TAG, "char found!" + charac);
         }
 
-        byte[] value = new byte[1];
-        value[0] = 0x47;
+        byte[] value = new byte[2];
+        int repeats = Integer.parseInt(findViewById(R.id.repeats).toString());
+        value[0] = (byte) repeats;
+        int exerciseId = Integer.parseInt(view.getTag().toString());
+        value[1] = (byte) exerciseId;
         //value[15] = 0x01;
         /*for (int i = 0; i < 14; i++)
         {
@@ -542,6 +564,7 @@ public class Start extends AppCompatActivity {
         boolean status = mBluetoothGatt.writeCharacteristic(charac);
         Log.e(TAG, "Number of Bytes:" + value.length);
         Log.e(TAG, "Byte 0:" + value[0]);
+        Log.e(TAG, "Byte 1:" + value[1]);
         Log.e(TAG, "WriteStatus:" + status);
         return status;
     }

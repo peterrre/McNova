@@ -73,6 +73,7 @@
         android:layout_alignParentLeft="true"
         android:layout_margin="20dp"
         android:text="Uebung1"
+        android:tag="1"
         android:onClick="writeCharacteristic" />
     <Button
         android:id="@+id/exercise2"
@@ -82,6 +83,7 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="20dp"
         android:text="Uebung2"
+        android:tag="2"
         android:onClick="decreaseRepeats" />
     <Button
         android:id="@+id/exercise3"
@@ -91,6 +93,7 @@
         android:layout_alignParentRight="true"
         android:layout_margin="20dp"
         android:text="Uebung3"
+        android:tag="3"
         android:onClick="decreaseRepeats" />
 
     <TextView
