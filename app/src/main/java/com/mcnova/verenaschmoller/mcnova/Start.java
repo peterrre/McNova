@@ -22,6 +22,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.ParcelUuid;
+import android.support.design.widget.Snackbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -57,9 +58,8 @@ public class Start extends AppCompatActivity {
     }
 
     String bluetoothDevice = "MCNOVA_FA50";
-    String bleBluetoothDevice = "MCNOVA_FA50";
 
-    Button btOn, btList, btOff;
+    Button btOn, btList, btOff, btConnect;
     private int devNumber;
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
@@ -80,7 +80,7 @@ public class Start extends AppCompatActivity {
     private BluetoothManager btManager;
     private BluetoothAdapter btAdapter;
     private TextView bleTextView;
-    Button bleScanButton, bleStop;
+    Button bleScanButton, bleStopButton;
     private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private BluetoothGatt mBluetoothGatt;
@@ -117,38 +117,24 @@ public class Start extends AppCompatActivity {
         btOn = findViewById(R.id.buttonOn);
         btList = findViewById(R.id.buttonList);
         btOff = findViewById(R.id.buttonOff);
+        btConnect = findViewById(R.id.buttonConnect);
+        bleScanButton = findViewById(R.id.bleScan);
+        bleStopButton = findViewById(R.id.bleScanStop);
 
         BA = BluetoothAdapter.getDefaultAdapter();
         lv = findViewById(R.id.listView);
 
-        //BLE Varbiablen Initialsierung
+        //BLE Variablen Initialsierung
         btManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         btAdapter = btManager.getAdapter();
         btScanner = btAdapter.getBluetoothLeScanner();
-        bleScanButton = (Button) findViewById(R.id.bleScan);
-        bleStop = (Button) findViewById(R.id.bleScanStop);
-
-        //Setzen der Buttons für die den Start und Stop des Scanvorgangs von Bluetooth Low Energie
-        bleScanButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startScanning();
-            }
-        });
-        bleStop.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                stopScanning();
-            }
-        });
 
         //Laden des Textviews von BLE
         bleTextView = (TextView) findViewById(R.id.TextViewBLE);
-        //Setzen wie sie das TextView verhält
+        //Setzen wie sich das TextView verhält
         bleTextView.setMovementMethod(new ScrollingMovementMethod());
 
-        // Example of a call to a native method
-        //TextView tv = findViewById(R.id.sample_text);
-        //tv.setText(stringFromJNI());
-
+        //Enable/Disable Buttons falls Bluetooth auf dem Gerät ein- bzw. ausgeschaltet ist
         if (BA.isEnabled()) {
             btOn.setEnabled(false);
         } else {
@@ -183,7 +169,7 @@ public class Start extends AppCompatActivity {
                 Log.e(TAG, "NULL DEVICES!!\n\n\n\n");
             } else {
                 bleTextView.append("Dev: " + result.getDevice().getName() + " UUID: " + result.getScanRecord().getServiceUuids() + "ADDR:" + result.getDevice().getAddress() + "\n");
-                Log.e(TAG, result.getDevice().getName() + "###########################################################################################!!\n\n\n\n");
+                Log.e(TAG, result.getDevice().getName());
             }
 
             // auto scroll for text view
@@ -195,7 +181,7 @@ public class Start extends AppCompatActivity {
     };
 
     //Methode, welche beim Klick auf den Button SCANBLE aufgerufen wird
-    public void startScanning() {
+    public void startScanning(View view) {
         System.out.println("start scanning");
         bleTextView.setText("Geräte Scannen\n");
         AsyncTask.execute(new Runnable() {
@@ -205,9 +191,9 @@ public class Start extends AppCompatActivity {
             }
         });
     }
-    //Methode, welche beim Klick auf den Button BLESTOP aufgerufen wird
 
-    public void stopScanning() {
+    //Methode, welche beim Klick auf den Button BLESTOP aufgerufen wird
+    public void stopScanning(View view) {
         System.out.println("stopping scanning");
         //bleTextView.setText("Scan gestoppt!\n");
         AsyncTask.execute(new Runnable() {
@@ -218,162 +204,229 @@ public class Start extends AppCompatActivity {
         });
     }
 
-
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    //public native String stringFromJNI();
-
+    //Methode, welche beim Klick auf den Button 'Verbindung herstellen' aufgerufen wird
+    //Voraussetzung: Bluetooth Device muss gepaired sein!
     public void connectToRobot(View view) {
 
         pairedDevices = BA.getBondedDevices();
         for (BluetoothDevice bt : pairedDevices) {
-            Log.e(TAG, bt.getName() + " = " + bluetoothDevice);
-            Log.e(TAG, Boolean.toString(bt.getName().equals(bluetoothDevice)));
-            if (bt.getName().equals(bluetoothDevice)) {
-                _bluetoothDev = bt;
+            Log.e(TAG, bt.getName());                       //Liste an gepaarten Devices durchgehen
+            if (bt.getName().equals(bluetoothDevice)) {     //Checken, ob gesuchtes Gerät enthalten ist
+                _bluetoothDev = bt;                         //Falls ja, gesuchtes Gerät in Variable abspeichern
             }
         }
 
-        BluetoothSocket socket = null;
         TextView pressed = findViewById(R.id.connectionBool);
-        if (_bluetoothDev.getName() != "") {
+        if (_bluetoothDev.getName() != "") {                                            // Prüfung, ob Device-Variable belegt ist
             Log.e(TAG, _bluetoothDev.getAddress());
-            //_bluetoothDe#v.createBond();
             int bond = _bluetoothDev.getBondState();
-            pressed.setText(String.valueOf(bond) + " to " + _bluetoothDev.getName());
+            pressed.setText(String.valueOf(bond) + " to " + _bluetoothDev.getName());   // Verbindungsstatus anzeigen
+
+            //Verbindung wird hergestellt
             mBluetoothGatt = _bluetoothDev.connectGatt(this, false, mGattCallback);
             Log.e(TAG, "###################################################Connected to" + mBluetoothGatt.getDevice().getName());
-            //ConnectThread t = new ConnectThread(_bluetoothDev, devNumber);
-            //pressed.setText("connected");
-            //t.start();
+
+            /*
+            Classic Bluetooth 4.0:
+            --------------------------------
+            ConnectThread t = new ConnectThread(_bluetoothDev, devNumber);
+            pressed.setText("connected");
+            t.start();
+            */
         } else {
             pressed.setText("could not connect");
         }
     }
 
-    public void ShowConnectedDevices(View view) {
-        Log.e(TAG, "Funktion!!!!!!!");
-        //List<BluetoothDevice> gattServerConnectedDevices = btManager.getConnectedDevices(BluetoothProfile.GATT_SERVER);
-        Set<BluetoothDevice> gattServerConnectedDevices = BA.getBondedDevices();
-        for (BluetoothDevice device1 : gattServerConnectedDevices) {
-            Log.e(TAG, "Found connected device: " + device1.getName());
-            Log.e(TAG, "Found UUIDS device: " + device1.getUuids()[0].toString() + " Length " + device1.getUuids().length);
+    //Methode, welche beim Klick auf eine der Übungen aufgerufen wird
+    public boolean writeCharacteristic(View view) {
 
+        boolean status = false;
+        TextView connBool = findViewById(R.id.connectionBool);
+        AlertDialog alertDialog = new AlertDialog.Builder(Start.this).create();
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+        //check if mBluetoothGatt is available
+        if (mBluetoothGatt == null) {
+            Log.e(TAG, "lost connection");
+            connBool.setText("writeStatus: " + status);
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("Keine Verbindung");
+            alertDialog.show();
+            return false;
         }
+        else {
+            Log.e(TAG, "connection good" + mBluetoothGatt.toString());
+        }
+
+        //check if Service is available
+        BluetoothGattService Service = mBluetoothGatt.getService(service);
+        if (Service == null) {
+            Log.e(TAG, "service not found!" + Service);
+            connBool.setText("writeStatus: " + status);
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("Service nicht gefunden");
+            alertDialog.show();
+            return false;
+        }
+        else {
+            Log.e(TAG, "service found!" + Service);
+        }
+
+        //check if Characteristic is available
+        BluetoothGattCharacteristic charac = Service.getCharacteristic(character);
+        if (charac == null) {
+            Log.e(TAG, "char not found!");
+            connBool.setText("writeStatus: " + status);
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("Characteristic nicht gefunden");
+            alertDialog.show();
+            return false;
+        }
+        else {
+            Log.e(TAG, "char found!" + charac);
+        }
+
+        //byte array initialisieren und mit ausgewählten Werten belegen
+        byte[] value = new byte[16];                                        // Bluetooth Chip kann 16 byte empfangen
+        TextView repeats = findViewById(R.id.repeats);
+        int nRepeats = Integer.parseInt(repeats.getText().toString());
+        value[0] = (byte) nRepeats;                     // Zwischen 1 und 10
+        int exerciseId = Integer.parseInt(view.getTag().toString());        // Übungs-ID wird vom Button-Tag abgerufen
+        value[1] = (byte) exerciseId;                   // Zwischen 1 und 6
+
+        //value[15] = 0x01;
+        /*for (int i = 2; i < 16; i++)
+        {
+            value[i] = 0x00;
+        }*/
+
+        charac.setValue(value);
+        status = mBluetoothGatt.writeCharacteristic(charac);
+        Log.e(TAG, "Number of Bytes:" + value.length);
+        Log.e(TAG, "Byte 0:" + value[0]);
+        Log.e(TAG, "Byte 1:" + value[1]);
+        Log.e(TAG, "WriteStatus:" + status);
+
+        if(status) {
+            connBool.setText("writeStatus: " + status);
+
+            alertDialog.setTitle("Erfolg");
+            alertDialog.setMessage("Übung wird ausgeführt.\nBitte warten Sie bis der Roboter die aktuelle Übung beendet hat!");
+            alertDialog.show();
+        }
+        else {
+            connBool.setText("writeStatus: " + status);
+            alertDialog.setTitle("Error");
+            alertDialog.setMessage("Characteristic konnte nicht beschrieben werden");
+            alertDialog.show();
+        }
+        return status;
     }
 
+    //Methode, welche beim Klick auf den Button '+' aufgerufen wird
+    //Wiederholungsvariable inkrementieren
     public void increaseRepeats(View view) {
         int temp = 0;
         TextView repeats = findViewById(R.id.repeats);
         temp = Integer.parseInt(repeats.getText().toString());
         temp += 1;
         repeats.setText(String.valueOf(temp));
-        if (temp == 10) {
-            Button bt = findViewById(R.id.increase);
-            bt.setEnabled(false);
-        }
-        else if (temp > 1) {
+        if (temp == 10) {                                           // '+' und '-' Buttons
+            findViewById(R.id.increase).setEnabled(false);          // entsprechend aktivieren/deaktivieren,
+        }                                                           // um für die Wiederholungsvariable nur
+        else if (temp > 1) {                                        // Werte zwischen 1 und 10 zuzulassen
             findViewById(R.id.increase).setEnabled(true);
             findViewById(R.id.decrease).setEnabled(true);
         }
 
     }
 
+    //Methode, welche beim Klick auf den Button '-' aufgerufen wird
+    //Wiederholungsvariable dekrementieren
     public void decreaseRepeats(View view) {
         int temp = 0;
         TextView repeats = findViewById(R.id.repeats);
         temp = Integer.parseInt(repeats.getText().toString());
         temp -= 1;
         repeats.setText(String.valueOf(temp));
-        if (temp == 1) {
-            Button bt = findViewById(R.id.decrease);
-            bt.setEnabled(false);
-        }
-        else if (temp < 10){
+        if (temp == 1) {                                            // '+' und '-' Buttons
+            findViewById(R.id.decrease).setEnabled(false);          // entsprechend aktivieren/deaktivieren,
+        }                                                           // um für die Wiederholungsvariable nur
+        else if (temp < 10){                                        // Werte zwischen 1 und 10 zuzulassen
             findViewById(R.id.increase).setEnabled(true);
             findViewById(R.id.decrease).setEnabled(true);
         }
     }
 
+    //Methode, welche beim Klick auf den Button 'Turn On' aufgerufen wird
+    //Bluetooth auf den Gerät einschalten
     public void on(View v) {
-        if (!BA.isEnabled()) {
+        if (!BA.isEnabled()) {                                      // Abfrage ob Bluetooth bereits eingeschaltet ist
             Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnOn, 0);
             Toast.makeText(getApplicationContext(), "Turned on", Toast.LENGTH_LONG).show();
-            btList.setEnabled(true);
-            btOff.setEnabled(true);
+            btList.setEnabled(true);                                // Buttons entsprechend aktivieren/deaktivieren
+            btOff.setEnabled(true);                                 // Bluetooth eingeschaltet:
+            btConnect.setEnabled(true);                             // alle Buttons verfügbar, außer 'Turn On'
+            bleScanButton.setEnabled(true);
+            bleStopButton.setEnabled(true);
             btOn.setEnabled(false);
         } else {
             Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
         }
     }
 
+    //Methode, welche beim Klick auf den Button 'Turn Off' aufgerufen wird
+    //Bluetooth auf den Gerät ausschalten
     public void off(View v) {
-        BA.disable();
+        BA.disable();                                               // Bluetooth ausschalten
         Toast.makeText(getApplicationContext(), "Turned off", Toast.LENGTH_LONG).show();
-        btOn.setEnabled(true);
-        btList.setEnabled(false);
-        btOff.setEnabled(false);
+
+        btOn.setEnabled(true);                                      // Buttons entsprechend aktivieren/deaktivieren
+        btList.setEnabled(false);                                   // Bluetooth ausgeschaltet:
+        btOff.setEnabled(false);                                    // kein Button verfügbar, außer 'Turn On'
+        btConnect.setEnabled(false);
+        bleScanButton.setEnabled(false);
+        bleStopButton.setEnabled(false);
     }
 
-
+    // Aktiviert Sichtbarkeit des Gerätes
     public void visible(View v) {
         Intent getVisible = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
         startActivityForResult(getVisible, 0);
     }
 
-    //Liste für normales Bluetooth
+    //Methode, welche beim Klick auf den Button 'List devices' aufgerufen wird
+    //Listet gepaarte Geräte auf, welche den Namen des gesuchten Gerätes haben
     public void list(View v) {
         pairedDevices = BA.getBondedDevices();
 
         ArrayList list = new ArrayList();
-        boolean counter = true;
-        devNumber = 0;
-
         for (BluetoothDevice bt : pairedDevices) {
-            //list.add(bt.getName());
-            Log.e(TAG, bt.getName() + " = " + bluetoothDevice);
-            Log.e(TAG, Boolean.toString(bt.getName().equals(bluetoothDevice)));
+            Log.e(TAG, bt.getName());
             if (bt.getName().equals(bluetoothDevice)) {
                 list.add(bt.getName());
                 _bluetoothDev = bt;
-                Log.e(TAG, _bluetoothDev.getName());
-                counter = false;
+                Log.e(TAG, "Found required Bluetooth device with name: " + _bluetoothDev.getName());
             }
-            if (counter) devNumber++;
         }
 
         Toast.makeText(getApplicationContext(), "Showing Paired Devices", Toast.LENGTH_SHORT).show();
-
         final ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, list);
-
         lv.setAdapter(adapter);
     }
 
 
     // Starten des BLE Scans
     private void startBLEScan() {
-        if (!hasLocationPermissions())  //Check ob man die Location Permissions hat
-            requestLocationPermission(); // Wenn nein, dann hohl sie dir
-
         List<ScanFilter> filters = new ArrayList<>();
         ScanSettings settings = new ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build();
-        // mScanResults = new HashMap<>();
-        // mScanCallback = new BLEScanCallback(mScanResults);
-
-
-    }
-
-    private boolean hasLocationPermissions() {
-
-        return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestLocationPermission() {
-        // requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_FINE_LOCATION);
-
     }
 
     private class BLEScanCallback extends ScanCallback {
@@ -402,6 +455,55 @@ public class Start extends AppCompatActivity {
         }
     }
 
+    private final BluetoothGattCallback mGattCallback =
+            new BluetoothGattCallback() {
+                @Override
+                public void onConnectionStateChange(BluetoothGatt gatt, int status,
+                                                    int newState) {
+                    String intentAction;
+                    if (newState == BluetoothProfile.STATE_CONNECTED) {
+                        intentAction = ACTION_GATT_CONNECTED;
+                        mConnectionState = STATE_CONNECTED;
+                        broadcastUpdate(intentAction);
+                        Log.i(TAG, "Connected to GATT server.");
+                        Log.i(TAG, "Attempting to start service discovery:" +
+                                mBluetoothGatt.discoverServices());
+
+                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                        intentAction = ACTION_GATT_DISCONNECTED;
+                        mConnectionState = STATE_DISCONNECTED;
+                        Log.i(TAG, "Disconnected from GATT server.");
+                        broadcastUpdate(intentAction);
+                    }
+                }
+
+                @Override
+                // New services discovered
+                public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                    if (status == BluetoothGatt.GATT_SUCCESS) {
+                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+                    } else {
+                        Log.w(TAG, "onServicesDiscovered received: " + status);
+                    }
+                }
+            };
+
+    private void broadcastUpdate(final String action) {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
+    public void ShowConnectedDevices(View view) {
+        Set<BluetoothDevice> gattServerConnectedDevices = BA.getBondedDevices();
+        for (BluetoothDevice device1 : gattServerConnectedDevices) {
+            Log.e(TAG, "Found connected device: " + device1.getName());
+            Log.e(TAG, "Found UUIDS device: " + device1.getUuids()[0].toString() + " Length " + device1.getUuids().length);
+
+        }
+    }
+
+    // Classic Bluetooth 4.0 connection.
+    // Not used
     private static class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final BluetoothDevice mmDevice;
@@ -474,101 +576,6 @@ public class Start extends AppCompatActivity {
                 Log.e(TAG, "Could not close the client socket", e);
             }
         }
-    }
-
-    // TODO Befehle an Device / Box senden
-    private final BluetoothGattCallback mGattCallback =
-            new BluetoothGattCallback() {
-                @Override
-                public void onConnectionStateChange(BluetoothGatt gatt, int status,
-                                                    int newState) {
-                    String intentAction;
-                    if (newState == BluetoothProfile.STATE_CONNECTED) {
-                        intentAction = ACTION_GATT_CONNECTED;
-                        mConnectionState = STATE_CONNECTED;
-                        broadcastUpdate(intentAction);
-                        Log.i(TAG, "Connected to GATT server.");
-                        Log.i(TAG, "Attempting to start service discovery:" +
-                                mBluetoothGatt.discoverServices());
-
-                    } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                        intentAction = ACTION_GATT_DISCONNECTED;
-                        mConnectionState = STATE_DISCONNECTED;
-                        Log.i(TAG, "Disconnected from GATT server.");
-                        broadcastUpdate(intentAction);
-                    }
-                }
-
-                @Override
-                // New services discovered
-                public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-                    } else {
-                        Log.w(TAG, "onServicesDiscovered received: " + status);
-                    }
-                }
-            };
-
-    private void broadcastUpdate(final String action) {
-        final Intent intent = new Intent(action);
-        sendBroadcast(intent);
-    }
-
-    public boolean writeCharacteristic(View view) {
-
-        //check mBluetoothGatt is available
-        if (mBluetoothGatt == null) {
-            Log.e(TAG, "lost connection");
-            return false;
-        }
-        {
-            Log.e(TAG, "connection good" + mBluetoothGatt.toString());
-        }
-        BluetoothGattService Service = mBluetoothGatt.getService(service);
-        if (Service == null) {
-            Log.e(TAG, "service not found!" + Service);
-            return false;
-        }
-        else
-        {
-            Log.e(TAG, "service found!" + Service);
-        }
-        BluetoothGattCharacteristic charac = Service.getCharacteristic(character);
-        if (charac == null) {
-            Log.e(TAG, "char not found!");
-            return false;
-        }
-        else
-        {
-            Log.e(TAG, "char found!" + charac);
-        }
-
-        byte[] value = new byte[16];
-        TextView repeats = findViewById(R.id.repeats);
-        int nRepeats = Integer.parseInt(repeats.getText().toString());
-        //Integer.parseInt(repeats.getText().toString());
-        value[0] = (byte) nRepeats;
-        int exerciseId = Integer.parseInt(view.getTag().toString());
-        value[1] = (byte) exerciseId;
-        //value[15] = 0x01;
-        /*for (int i = 2; i < 16; i++)
-        {
-            value[i] = 0x00;
-        }*/
-        //value[1] = 0x02;
-        //value[0] = (byte) (116);
-        //value[1] = (byte) (105);
-        //charac.setValue(value);
-        //String test = "it";
-        //value = test.getBytes();
-        charac.setValue(value);
-        boolean status = mBluetoothGatt.writeCharacteristic(charac);
-        Log.e(TAG, "Number of Bytes:" + value.length);
-        Log.e(TAG, "Byte 0:" + value[0]);
-        Log.e(TAG, "Byte 1:" + value[1]);
-        Log.e(TAG, "WriteStatus:" + status);
-        return status;
     }
 }
 

@@ -198,6 +198,7 @@
         android:layout_below="@+id/ble"
         android:layout_alignParentRight="true"
         android:layout_marginRight="20dp"
+        android:onClick="startScanning"
         />
 
     <Button
@@ -207,7 +208,8 @@
         android:id="@+id/bleScanStop"
         android:layout_below="@+id/bleScan"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="20dp"/>
+        android:layout_marginRight="20dp"
+        android:onClick="stopScanning"/>
 
     <Space
         android:id="@+id/space03"
